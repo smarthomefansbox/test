@@ -1,27 +1,29 @@
-name: Update Supervisor Version
+name: CI
 
-on:
-  schedule:
-    # 每天运行一次，您可以根据需要调整时间表
-    - cron: '0 0 * * *'
-  workflow_dispatch: # 允许手动触发工作流
+on: [push]
 
 jobs:
-  update-version:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0  # 确保获取所有分支的历史
 
-    - name: Fetch Supervisor Version
-      run: |
-        curl -s https://version.home-assistant.io/stable.json | jq -r '.supervisor' > test.txt
-
-    - name: Commit and push if there are changes
+    - name: Set up Git
       run: |
         git config --global user.name 'smarthomefansbox'
         git config --global user.email 'zhangjian3120@gmail.com'
+
+    - name: Make changes
+      run: |
+        echo 'some changes' > test.txt
         git add test.txt
         git commit -m "Update Supervisor version" || exit 0   # 如果没有变化则不提交
-        git push
+
+    - name: Push changes
+      run: |
+        git push origin HEAD:${{ github.ref }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
