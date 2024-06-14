@@ -43,11 +43,11 @@ ghcr.io/home-assistant/amd64-hassio-multicast:${{ env.multicast }} registry.cn-h
         echo "$content" > trigger.txt
 
     - name: Commit and push changes
+      env:
+        REPO_ACCESS_TOKEN: ${{ secrets.REPO_ACCESS_TOKEN }}
       run: |
         git config user.name "smarthomefansbox"
         git config user.email "zhangjian3120@gmail.com"
         git add trigger.txt
         git commit -m "Update trigger.txt with new versions"
         git push -u origin main --force
-      env:
-        REPO_ACCESS_TOKEN: ${{ secrets.REPO_ACCESS_TOKEN }}
