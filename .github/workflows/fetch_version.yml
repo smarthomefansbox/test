@@ -1,0 +1,50 @@
+name: Fetch Supervisor Version
+
+on:
+  schedule:
+    - cron: '*/5 * * * *' # 每五分钟运行一次
+  workflow_dispatch: # 允许手动触发
+
+jobs:
+  fetch-and-update:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20' # 使用最新的 Node.js 20 版本
+
+    - name: Install jq
+      run: sudo apt-get update && sudo apt-get install -y jq
+
+    - name: Fetch supervisor version
+      id: fetch_supervisor_version
+      run: |
+        curl -s https://version.home-assistant.io/stable.json -o stable.json
+        cat stable.json # 输出内容以便调试
+        SUPERVISOR_VERSION=$(jq -r '.supervisor' stable.json)
+        echo "Fetched supervisor version: $SUPERVISOR_VERSION"
+        echo "SUPERVISOR_VERSION=$SUPERVISOR_VERSION" >> $GITHUB_ENV
+
+    - name: Update test.txt
+      run: |
+        echo "$SUPERVISOR_VERSION" > test.txt
+        cat test.txt # 输出内容以便调试
+
+    - name: Commit changes
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
+        git add test.txt
+        git commit -m "Update supervisor version to $SUPERVISOR_VERSION" || echo "No changes to commit"
+
+    - name: Push changes to the target repository
+      env:
+        REPO_ACCESS_TOKEN: ${{ secrets.REPO_ACCESS_TOKEN }}
+      run: |
+        git remote set-url origin https://x-access-token:${REPO_ACCESS_TOKEN}@github.com/smarthomefans01/docker-pull-proxy.git
+        git push origin main
