@@ -49,4 +49,5 @@ jobs:
       env:
         REPO_ACCESS_TOKEN: ${{ secrets.REPO_ACCESS_TOKEN }}
       run: |
-        git push https://${{ secrets.REPO_ACCESS_TOKEN }}@github.com/smarthomefansbox/test.git
+        git remote set-url origin https://${{ secrets.REPO_ACCESS_TOKEN }}@github.com/smarthomefansbox/test.git
+        git push origin HEAD:main
