@@ -45,9 +45,8 @@ jobs:
         git add test.txt
         git commit -m "Update supervisor version to $SUPERVISOR_VERSION" || echo "No changes to commit"
 
-    - name: Push changes to the target repository
+    - name: Push changes to the repository
       env:
         REPO_ACCESS_TOKEN: ${{ secrets.REPO_ACCESS_TOKEN }}
       run: |
-        git remote set-url origin https://${{ secrets.REPO_ACCESS_TOKEN }}@github.com/smarthomefansbox/test.git
         git push https://${{ secrets.REPO_ACCESS_TOKEN }}@github.com/smarthomefansbox/test.git
