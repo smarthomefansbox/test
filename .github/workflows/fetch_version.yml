@@ -1,38 +1,26 @@
-name: Fetch Home Assistant Supervisor Version
+name: Update Supervisor Version
 
 on:
   schedule:
-    # 每天运行一次，您可以根据需要调整时间表
+    # 每天运行一次，您可以根据需要调整时间
     - cron: '0 0 * * *'
-  workflow_dispatch: # 允许手动触发工作流
 
 jobs:
-  fetch_version:
+  update-version:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
-      - name: Fetch Supervisor Version
-        run: |
-          # 使用curl命令获取stable.json文件内容
-          curl -o stable.json https://version.home-assistant.io/stable.json
-          # 使用jq命令解析JSON并提取supervisor版本号
-          SUPERVISOR_VERSION=$(jq -r '.supervisor' stable.json)
-          # 将版本号写入test.txt文件
-          echo "Supervisor version: $SUPERVISOR_VERSION" > test.txt
-        continue-on-error: true # 如果命令失败，工作流将继续
+    - name: Fetch Supervisor Version
+      run: |
+        curl -s https://version.home-assistant.io/stable.json | jq -r '.supervisor' > test.txt
 
-      - name: Commit and push
-        run: |
-          git config --local user.email "zhangjian3120@gmail.com"
-          git config --local user.name "smarthomefansbox"
-          git add test.txt
-          if git diff --staged --quiet; then
-            echo "No changes to commit."
-          else
-            git commit -m "Update Supervisor version to $SUPERVISOR_VERSION"
-            git push
-          fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Commit and push if there are changes
+      run: |
+        git config --global user.name 'Your Name'
+        git config --global user.email 'your-email@example.com'
+        git add test.txt
+        git commit -m "Update Supervisor version" || exit 0   # 如果没有变化则不提交
+        git push
