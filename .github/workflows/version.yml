@@ -36,12 +36,12 @@ jobs:
 
       - name: Commit and push changes
         env:
-          GIT_USER: ${{ secrets.GIT_USER_NAME }}
+          GIT_USER: ${{ secrets.GIT_user }}
           GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
         run: |
           cd ${{ github.workspace }}/dockerimg
           git config --global user.name "$GIT_USER"
           git config --global user.email "$GIT_USER_EMAIL"
           git add trigger.txt
-          git commit -m "Update trigger.txt with new versions"
+          git commit -m "Update trigger.txt with new versions" || true
           git push --force
