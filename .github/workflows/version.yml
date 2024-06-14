@@ -34,7 +34,15 @@ jobs:
           content="..."
           echo "$content" > ${{ github.workspace }}/dockerimg/trigger.txt
 
-      - name: Commit and push changes
+      - name: Check if trigger.txt has changed
+        id: file_check
+        run: |
+          if ! cmp --silent ${{ github.workspace }}/dockerimg/trigger.txt trigger.txt; then
+            echo "::set-output name=changed::true"
+          fi
+
+      - name: Commit and push changes if different
+        if: steps.file_check.outputs.changed == 'true'
         env:
           GIT_USER: ${{ secrets.GIT_user }}
           GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
@@ -43,5 +51,5 @@ jobs:
           git config --global user.name "$GIT_USER"
           git config --global user.email "$GIT_USER_EMAIL"
           git add trigger.txt
-          git commit -m "Update trigger.txt with new versions" || true
+          git commit -m "Update trigger.txt with new versions"
           git push --force
